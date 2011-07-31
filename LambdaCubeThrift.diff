@@ -1,0 +1,210 @@
+diff -r thrift.orig/TSerialization.py thrift.lc/TSerialization.py
+20,21c20,21
+< from protocol import TBinaryProtocol
+< from transport import TTransport
+---
+> from thrift.protocol import TBinaryProtocol
+> from thrift.transport import TTransport
+diff -r thrift.orig/protocol/TBinaryProtocol.py thrift.lc/protocol/TBinaryProtocol.py
+20c20
+< from TProtocol import *
+---
+> from thrift.protocol.TProtocol import *
+diff -r thrift.orig/protocol/TCompactProtocol.py thrift.lc/protocol/TCompactProtocol.py
+1c1
+< from TProtocol import *
+---
+> from thrift.protocol.TProtocol import *
+diff -r thrift.orig/server/THttpServer.py thrift.lc/server/THttpServer.py
+20c20,21
+< import BaseHTTPServer
+---
+> import http
+> from http.server import HTTPServer
+46c47
+<       server_class = BaseHTTPServer.HTTPServer):
+---
+>       server_class = HTTPServer):
+60c61
+<     class RequestHander(BaseHTTPServer.BaseHTTPRequestHandler):
+---
+>     class RequestHander(http.server.BaseHTTPRequestHandler):
+71c72
+<         except ResponseException, exn:
+---
+>         except (ResponseException) as exn:
+diff -r thrift.orig/server/TNonblockingServer.py thrift.lc/server/TNonblockingServer.py
+28c28
+< import Queue
+---
+> import queue
+225c225
+<         self.tasks = Queue.Queue()
+---
+>         self.tasks = queue.Queue()
+diff -r thrift.orig/server/TProcessPoolServer.py thrift.lc/server/TProcessPoolServer.py
+24c24
+< from TServer import TServer
+---
+> from thrift.server.TServer import TServer
+64c64
+<             except Exception, x:
+---
+>             except (Exception) as x:
+77c77
+<         except TTransportException, tx:
+---
+>         except (TTransportException) as tx:
+79c79
+<         except Exception, x:
+---
+>         except (Exception) as x:
+102c102
+<             except Exception, x:
+---
+>             except (Exception) as x:
+115c115
+<             except Exception, x:
+---
+>             except (Exception) as x:
+diff -r thrift.orig/server/TServer.py thrift.lc/server/TServer.py
+25c25
+< import Queue
+---
+> import queue
+84c84
+<       except TTransport.TTransportException, tx:
+---
+>       except (TTransport.TTransportException) as tx:
+86c86
+<       except Exception, x:
+---
+>       except (Exception) as x:
+110c110
+<       except Exception, x:
+---
+>       except (Exception) as x:
+121c121
+<     except TTransport.TTransportException, tx:
+---
+>     except (TTransport.TTransportException) as tx:
+123c123
+<     except Exception, x:
+---
+>     except (Exception) as x:
+135c135
+<     self.clients = Queue.Queue()
+---
+>     self.clients = queue.Queue()
+149c149
+<       except Exception, x:
+---
+>       except (Exception) as x:
+161c161
+<     except TTransport.TTransportException, tx:
+---
+>     except (TTransport.TTransportException) as tx:
+163c163
+<     except Exception, x:
+---
+>     except (Exception) as x:
+176c176
+<       except Exception, x:
+---
+>       except (Exception) as x:
+185c185
+<       except Exception, x:
+---
+>       except (Exception) as x:
+212c212
+<       except IOError, e:
+---
+>       except (IOError) as e:
+245c245
+<             except TTransport.TTransportException, tx:
+---
+>             except (TTransport.TTransportException) as tx:
+247c247
+<             except Exception, e:
+---
+>             except (Exception) as e:
+256c256
+<       except TTransport.TTransportException, tx:
+---
+>       except (TTransport.TTransportException) as tx:
+258c258
+<       except Exception, x:
+---
+>       except (Exception) as x:
+diff -r thrift.orig/transport/THttpClient.py thrift.lc/transport/THttpClient.py
+20,21c20,21
+< from TTransport import *
+< from cStringIO import StringIO
+---
+> from thrift.TTransport import *
+> from io import StringIO
+23,24c23,24
+< import urlparse
+< import httplib
+---
+> import urllib
+> import http
+diff -r thrift.orig/transport/TSSLSocket.py thrift.lc/transport/TSSLSocket.py
+76c76
+<         except socket.error, e:
+---
+>         except (socket.error) as e:
+82c82
+<     except socket.error, e:
+---
+>     except (socket.error) as e:
+165c165
+<     except ssl.SSLError, ssl_exc:
+---
+>     except (ssl.SSLError) as ssl_exc:
+diff -r thrift.orig/transport/TSocket.py thrift.lc/transport/TSocket.py
+20c20
+< from TTransport import *
+---
+> from thrift.transport.TTransport import *
+79c79
+<         except socket.error, e:
+---
+>         except (socket.error) as e:
+85c85
+<     except socket.error, e:
+---
+>     except (socket.error) as e:
+95c95
+<     except socket.error, e:
+---
+>     except (socket.error) as e:
+104c104
+<         buff = ''
+---
+>         buff = b''
+147c147
+<       except socket.error, err:
+---
+>       except (socket.error) as err:
+diff -r thrift.orig/transport/TTransport.py thrift.lc/transport/TTransport.py
+20c20
+< from cStringIO import StringIO
+---
+> from io import StringIO
+55c55
+<     buff = ''
+---
+>     buff = b''
+diff -r thrift.orig/transport/TTwisted.py thrift.lc/transport/TTwisted.py
+28c28
+< from cStringIO import StringIO
+---
+> from io import StringIO
+diff -r thrift.orig/transport/TZlibTransport.py thrift.lc/transport/TZlibTransport.py
+27,28c27,28
+< from cStringIO import StringIO
+< from TTransport import TTransportBase, CReadableTransport
+---
+> from io import StringIO
+> from thrift.transport.TTransport import TTransportBase, CReadableTransport

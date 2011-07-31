@@ -1,0 +1,17 @@
+howto compile thrift compiler:
+    ./configure --without-csharp --without-java --without-erlang --without-python --without-perl --without-php \
+    --without-php_extension --without-ruby --without-haskell --without-go
+
+thrift directory contains thrift python lib (version: 0.7.0-dev)
+    HINTS:
+        package imports are adjusted to this addon (lifted to lambdacube.thrift)
+        thrift/transport/TTransport.py: 
+            from cStringIO import StringIO -> from io import StringIO in
+        thrift/*.py
+            except x, y: -> except(x,y):
+        thrift/*.py
+            import Queue -> import queue
+        thrift/*.py
+            also modifie references
+            import BaseHTTPServer -> import http
+                                     from http.server import HTTPServer

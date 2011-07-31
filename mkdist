@@ -1,0 +1,8 @@
+rm lambdacube.zip
+mkdir dist
+svn export lambdacube dist/lambdacube
+cd dist
+zip -r lambdacube.zip .
+mv lambdacube.zip ..
+cd ..
+rm -r dist

@@ -1,0 +1,189 @@
+Index: compiler/cpp/src/generate/t_hs_generator.cc
+===================================================================
+--- compiler/cpp/src/generate/t_hs_generator.cc	(revision 1147486)
++++ compiler/cpp/src/generate/t_hs_generator.cc	(working copy)
+@@ -196,17 +196,18 @@
+   string f_consts_name = get_out_dir() + pname + "_Consts.hs";
+   f_consts_.open(f_consts_name.c_str());
+ 
++  string nspace = program_->get_namespace("hs");
+   // Print header
+   f_types_ << hs_language_pragma() << endl;
+   f_types_ << hs_autogen_comment() << endl;
+-  f_types_ << "module " << pname << "_Types where" << endl;
++  f_types_ << "module " << nspace << pname << "_Types where" << endl;
+   f_types_ << hs_imports() << endl;
+ 
+   f_consts_ << hs_language_pragma() << endl;
+   f_consts_ << hs_autogen_comment() << endl;
+-  f_consts_ << "module " << pname << "_Consts where" << endl;
++  f_consts_ << "module " << nspace << pname << "_Consts where" << endl;
+   f_consts_ << hs_imports() << endl;
+-  f_consts_ << "import " << pname << "_Types" << endl;
++  f_consts_ << "import " << nspace << pname << "_Types" << endl;
+ }
+ 
+ string t_hs_generator::hs_language_pragma() {
+@@ -676,19 +677,20 @@
+  */
+ void t_hs_generator::generate_service(t_service* tservice) {
+   string f_service_name = get_out_dir() + capitalize(service_name_) + ".hs";
++  string nspace = program_->get_namespace("hs");
+   f_service_.open(f_service_name.c_str());
+ 
+   f_service_ << hs_language_pragma() << endl;
+   f_service_ << hs_autogen_comment() << endl;
+-  f_service_ << "module " << capitalize(service_name_) << " where" << endl;
++  f_service_ << "module " << nspace << capitalize(service_name_) << " where" << endl;
+   f_service_ << hs_imports() << endl;
+ 
+   if (tservice->get_extends()) {
+-    f_service_ << "import qualified " << capitalize(tservice->get_extends()->get_name()) << endl;
++    f_service_ << "import qualified " << nspace << capitalize(tservice->get_extends()->get_name()) << endl;
+   }
+ 
+-  f_service_ << "import " << capitalize(program_name_) << "_Types" << endl;
+-  f_service_ << "import qualified " << capitalize(service_name_) << "_Iface as Iface" << endl;
++  f_service_ << "import " << nspace << capitalize(program_name_) << "_Types" << endl;
++  f_service_ << "import qualified " << nspace << capitalize(service_name_) << "_Iface as Iface" << endl;
+ 
+   // Generate the three main parts of the service
+   generate_service_helpers(tservice);
+@@ -748,22 +750,23 @@
+  */
+ void t_hs_generator::generate_service_interface(t_service* tservice) {
+   string f_iface_name = get_out_dir() + capitalize(service_name_) + "_Iface.hs";
++  string nspace = program_->get_namespace("hs");
+   f_iface_.open(f_iface_name.c_str());
+ 
+   f_iface_ << hs_language_pragma() << endl;
+   f_iface_ << hs_autogen_comment() << endl;
+ 
+-  f_iface_ << "module " << capitalize(service_name_) << "_Iface where" << endl;
++  f_iface_ << "module " << nspace << capitalize(service_name_) << "_Iface where" << endl;
+ 
+   f_iface_ << hs_imports() << endl;
+-  f_iface_ << "import " << capitalize(program_name_) << "_Types" << endl;
++  f_iface_ << "import " << nspace << capitalize(program_name_) << "_Types" << endl;
+   f_iface_ << endl;
+ 
+   string sname = capitalize(service_name_);
+   if (tservice->get_extends() != NULL) {
+     string extends = type_name(tservice->get_extends());
+ 
+-    indent(f_iface_) << "import " << extends << "_Iface" << endl;
++    indent(f_iface_) << "import " << nspace << extends << "_Iface" << endl;
+     indent(f_iface_) << "class " << extends << "_Iface a => " << sname << "_Iface a where" << endl;
+ 
+   } else {
+@@ -800,6 +803,7 @@
+ 
+   string extends = "";
+   string exports = "";
++  string nspace = program_->get_namespace("hs");
+ 
+   bool first = true;
+   for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
+@@ -810,17 +814,17 @@
+   }
+ 
+   string sname = capitalize(service_name_);
+-  indent(f_client_) << "module " << sname << "_Client(" << exports << ") where" << endl;
++  indent(f_client_) << "module " << nspace << sname << "_Client(" << exports << ") where" << endl;
+ 
+   if (tservice->get_extends() != NULL) {
+     extends = type_name(tservice->get_extends());
+-    indent(f_client_) << "import " << extends << "_Client" << endl;
++    indent(f_client_) << "import " << nspace << extends << "_Client" << endl;
+   }
+ 
+   indent(f_client_) << "import Data.IORef" << endl;
+   indent(f_client_) << hs_imports() << endl;
+-  indent(f_client_) << "import " << capitalize(program_name_) << "_Types" << endl;
+-  indent(f_client_) << "import " << capitalize(service_name_) << endl;
++  indent(f_client_) << "import " << nspace << capitalize(program_name_) << "_Types" << endl;
++  indent(f_client_) << "import " << nspace << capitalize(service_name_) << endl;
+ 
+   // DATS RITE A GLOBAL VAR
+   indent(f_client_) << "seqid = newIORef 0" << endl;
+Index: compiler/cpp/src/generate/t_py_generator.cc
+===================================================================
+--- compiler/cpp/src/generate/t_py_generator.cc	(revision 1147486)
++++ compiler/cpp/src/generate/t_py_generator.cc	(working copy)
+@@ -623,7 +623,7 @@
+ 
+       indent(out) << "(" << (*m_iter)->get_key() << ", "
+             << type_to_enum((*m_iter)->get_type()) << ", "
+-            << "'" << (*m_iter)->get_name() << "'" << ", "
++            << "b'" << (*m_iter)->get_name() << "'" << ", "
+             << type_to_spec_args((*m_iter)->get_type()) << ", "
+             << render_field_default_value(*m_iter) << ", "
+             << "),"
+@@ -824,7 +824,7 @@
+   indent_down();
+ 
+   indent(out) <<
+-    "oprot.writeStructBegin('" << name << "')" << endl;
++    "oprot.writeStructBegin(b'" << name << "')" << endl;
+ 
+   for (f_iter = fields.begin(); f_iter != fields.end(); ++f_iter) {
+     // Write field header
+@@ -833,7 +833,7 @@
+     indent_up();
+     indent(out) <<
+       "oprot.writeFieldBegin(" <<
+-      "'" << (*f_iter)->get_name() << "', " <<
++      "b'" << (*f_iter)->get_name() << "', " <<
+       type_to_enum((*f_iter)->get_type()) << ", " <<
+       (*f_iter)->get_key() << ")" << endl;
+ 
+@@ -1151,11 +1151,11 @@
+       f_service_ <<
+         indent() << "oprot = self._oprot_factory.getProtocol(self._transport)" << endl <<
+         indent() <<
+-          "oprot.writeMessageBegin('" << (*f_iter)->get_name() << "', TMessageType.CALL, self._seqid)"
++          "oprot.writeMessageBegin(b'" << (*f_iter)->get_name() << "', TMessageType.CALL, self._seqid)"
+         << endl;
+     } else {
+       f_service_ <<
+-        indent() << "self._oprot.writeMessageBegin('" << (*f_iter)->get_name() << "', TMessageType.CALL, self._seqid)" << endl;
++        indent() << "self._oprot.writeMessageBegin(b'" << (*f_iter)->get_name() << "', TMessageType.CALL, self._seqid)" << endl;
+     }
+ 
+     f_service_ <<
+@@ -1510,7 +1510,7 @@
+   }
+   for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
+     f_service_ <<
+-      indent() << "self._processMap[\"" << (*f_iter)->get_name() << "\"] = Processor.process_" << (*f_iter)->get_name() << endl;
++      indent() << "self._processMap[b\"" << (*f_iter)->get_name() << "\"] = Processor.process_" << (*f_iter)->get_name() << endl;
+   }
+   indent_down();
+   f_service_ << endl;
+@@ -1656,7 +1656,7 @@
+     indent_up();
+     f_service_ <<
+       indent() << "result.success = success" << endl <<
+-      indent() << "oprot.writeMessageBegin(\"" << tfunction->get_name() <<
++      indent() << "oprot.writeMessageBegin(b\"" << tfunction->get_name() <<
+         "\", TMessageType.REPLY, seqid)" << endl <<
+       indent() << "result.write(oprot)" << endl <<
+       indent() << "oprot.writeMessageEnd()" << endl <<
+@@ -1690,7 +1690,7 @@
+         }
+       }
+       f_service_ <<
+-        indent() << "oprot.writeMessageBegin(\"" << tfunction->get_name() <<
++        indent() << "oprot.writeMessageBegin(b\"" << tfunction->get_name() <<
+           "\", TMessageType.REPLY, seqid)" << endl <<
+         indent() << "result.write(oprot)" << endl <<
+         indent() << "oprot.writeMessageEnd()" << endl <<
+@@ -1756,7 +1756,7 @@
+     }
+ 
+     f_service_ <<
+-      indent() << "oprot.writeMessageBegin(\"" << tfunction->get_name() << "\", TMessageType.REPLY, seqid)" << endl <<
++      indent() << "oprot.writeMessageBegin(b\"" << tfunction->get_name() << "\", TMessageType.REPLY, seqid)" << endl <<
+       indent() << "result.write(oprot)" << endl <<
+       indent() << "oprot.writeMessageEnd()" << endl <<
+       indent() << "oprot.trans.flush()" << endl;
