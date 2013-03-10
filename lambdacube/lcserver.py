@@ -76,7 +76,7 @@ def packIdxUV(mesh,name):
     #bpy.data.meshes['Monkey'].uv_textures['UVTex'].data[0].uv4    
     uva = array.array('f',range(0,len(mesh.vertices)*2))
     uv = mesh.uv_textures[name].data
-    faces = mesh.faces
+    faces = mesh.polygons
     for n in range(0,len(faces)):
         [a,b,c] = faces[n].vertices
         uvf = uv[n]
@@ -89,10 +89,10 @@ def packIdxUV(mesh,name):
     return [bytes(uva)]
 
 def packPosition(mesh):
-    a = array.array('f',range(0,len(mesh.faces)*3*3))
+    a = array.array('f',range(0,len(mesh.polygons)*3*3))
     i = 0
     va = mesh.vertices
-    for f in mesh.faces:
+    for f in mesh.polygons:
         for v in f.vertices:
             a[i] = va[v].co[0] ; i += 1
             a[i] = va[v].co[1] ; i += 1
@@ -100,10 +100,10 @@ def packPosition(mesh):
     return [bytes(a)]
 
 def packNormal(mesh):
-    a = array.array('f',range(0,len(mesh.faces)*3*3))
+    a = array.array('f',range(0,len(mesh.polygons)*3*3))
     i = 0
     va = mesh.vertices
-    for f in mesh.faces:
+    for f in mesh.polygons:
         for v in f.vertices:
             a[i] = va[v].normal[0] ; i += 1
             a[i] = va[v].normal[1] ; i += 1
@@ -113,7 +113,7 @@ def packNormal(mesh):
 def packUV(mesh,name):
     if not name in mesh.uv_textures:
         return None
-    a = array.array('f',range(0,len(mesh.faces)*3*2))
+    a = array.array('f',range(0,len(mesh.polygons)*3*2))
     i = 0
     for f in mesh.uv_textures[name].data:
         uv = f.uv_raw
@@ -124,7 +124,7 @@ def packUV(mesh,name):
 def packColor(mesh,name):
     if not name in mesh.vertex_colors:
         return None
-    a = array.array('f',range(0,len(mesh.faces)*3*3))
+    a = array.array('f',range(0,len(mesh.polygons)*3*3))
     i = 0
     for f in mesh.vertex_colors[name].data:
         a[i] = f.color1[0] ; i += 1
@@ -146,7 +146,7 @@ def packMesh(mesh):
     return Mesh([position,normal] + uvs + colors,PrimitiveType.PT_Triangles)
 
 class BlenderHandler:
-  def downloadMesh(self, nameB):
+  def downloadMesh_temp(self, nameB):
     name = nameB.decode()
     print('downloadMesh(%s)' % name)
     if not name in bpy.data.meshes:
@@ -157,11 +157,52 @@ class BlenderHandler:
     # bpy.ops.mesh.quads_convert_to_tris()
     # send
 
-    mesh = bpy.data.meshes[name]
-    fsides = len(mesh.faces[0].vertices)
+    #selection = bpy.context.selected_objects
+    scene = bpy.context.scene
+    mode = bpy.context.mode
+    print(mode)
+    #fsides = len(mesh.faces[0].vertices)
     # only triangles are supported
-    if fsides != 3:
-        return Mesh()
+    #if fsides != 3:
+    #    return Mesh()
+    if mode != 'OBJECT':
+        bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.add(type='MESH')
+    #tmpObj = bpy.context.active_object
+    mesh = bpy.data.meshes[name].copy()
+    tmpObj = scene.objects.active
+    tmpObj.data = mesh
+    tmpObj.select = True
+    bpy.context.scene.update()
+    print(tmpObj,bpy.context.mode)
+    #if bpy.context.mode != 'EDIT':
+    #    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.quads_convert_to_tris()
+    bpy.context.scene.update()
+    bpy.ops.object.mode_set(mode='OBJECT')
+    #bpy.ops.object.delete(use_global=True)
+
+#########
+#    scene = bpy.context.scene
+#    bpy.ops.object.mode_set(mode='OBJECT')
+#    for i in scene.objects: i.select = False #deselect all objects
+#    object.select = True
+#    scene.objects.active = object #set the mesh object to current
+#    bpy.ops.object.mode_set(mode='EDIT') #Operators
+#    bpy.ops.mesh.select_all(action='SELECT')#select all the face/vertex/edge
+#    bpy.ops.mesh.quads_convert_to_tris() #Operators
+#    bpy.context.scene.update()
+#    bpy.ops.object.mode_set(mode='OBJECT') # set it in object
+#    print("Triangulate Mesh Done!")
+#    return object
+#########
+
+    if mode != 'OBJECT':
+        bpy.ops.object.mode_set(mode=mode)
+    #for o in selection:
+    #    o.select = True
     return packMesh(mesh)
     
     #vl = mesh.vertices
@@ -176,6 +217,20 @@ class BlenderHandler:
     #na = VertexAttribute(b'normal', AttributeType.AT_Vec3, n)
     #uvlist = [VertexAttribute(n.encode(),AttributeType.AT_Vec2,[packIdxUV(mesh,n)]) for n in mesh.uv_textures.keys()]
     #return Mesh([pa,na] + uvlist,ptype,i)
+
+  def downloadMesh(self, nameB):
+    name = nameB.decode()
+    print('downloadMesh(%s)' % name)
+    if not name in bpy.data.meshes:
+        print('error: Mesh not found: %s' % name)
+        return Mesh()
+    mesh = bpy.data.meshes[name]
+    fsides = len(mesh.polygons[0].vertices)
+    # only triangles are supported
+    if fsides != 3:
+        print('error: Return empty mesh, only triangle primitive is supported!')
+        return Mesh()
+    return packMesh(mesh)
 
 global transport
 handler = BlenderHandler()

@@ -3,12 +3,7 @@ bl_info = {
     "description"   : "Turns Blender into a LambdaCube editor",
     "author"        : "Csaba Hruska",
     "version"       : (0, 1),
-    "blender"       : (2, 5, 8),
-    "api"           : 37846,
-    "location"      : "",
-    "warning"       : "",
-    "wiki_url"      : "",
-    "tracker_url"   : "",
+    "blender"       : (2, 66, 1),
     "category"      : "Game Engine"}
 
 import sys
