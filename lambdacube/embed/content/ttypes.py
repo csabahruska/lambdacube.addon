@@ -66,6 +66,49 @@ class PrimitiveType:
     "PT_Triangles": 2,
   }
 
+class ImageType:
+  IT_RGBA8 = 0
+  IT_RGBAF = 1
+  IT_JPG = 2
+  IT_PNG = 3
+
+  _VALUES_TO_NAMES = {
+    0: "IT_RGBA8",
+    1: "IT_RGBAF",
+    2: "IT_JPG",
+    3: "IT_PNG",
+  }
+
+  _NAMES_TO_VALUES = {
+    "IT_RGBA8": 0,
+    "IT_RGBAF": 1,
+    "IT_JPG": 2,
+    "IT_PNG": 3,
+  }
+
+class PropertyType:
+  PT_Bool = 0
+  PT_Float = 1
+  PT_Int = 2
+  PT_String = 3
+  PT_Unsupported = 4
+
+  _VALUES_TO_NAMES = {
+    0: "PT_Bool",
+    1: "PT_Float",
+    2: "PT_Int",
+    3: "PT_String",
+    4: "PT_Unsupported",
+  }
+
+  _NAMES_TO_VALUES = {
+    "PT_Bool": 0,
+    "PT_Float": 1,
+    "PT_Int": 2,
+    "PT_String": 3,
+    "PT_Unsupported": 4,
+  }
+
 
 class VertexAttribute:
   """
@@ -110,7 +153,7 @@ class VertexAttribute:
         if ftype == TType.LIST:
           self.attrData = []
           (_etype3, _size0) = iprot.readListBegin()
-          for _i4 in xrange(_size0):
+          for _i4 in range(_size0):
             _elem5 = iprot.readString();
             self.attrData.append(_elem5)
           iprot.readListEnd()
@@ -192,7 +235,7 @@ class Mesh:
         if ftype == TType.LIST:
           self.attributes = []
           (_etype10, _size7) = iprot.readListBegin()
-          for _i11 in xrange(_size7):
+          for _i11 in range(_size7):
             _elem12 = VertexAttribute()
             _elem12.read(iprot)
             self.attributes.append(_elem12)
@@ -208,7 +251,7 @@ class Mesh:
         if ftype == TType.LIST:
           self.indexData = []
           (_etype16, _size13) = iprot.readListBegin()
-          for _i17 in xrange(_size13):
+          for _i17 in range(_size13):
             _elem18 = iprot.readString();
             self.indexData.append(_elem18)
           iprot.readListEnd()
@@ -241,6 +284,102 @@ class Mesh:
       for iter20 in self.indexData:
         oprot.writeString(iter20)
       oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class Property:
+  """
+  Attributes:
+   - propertyTypeName
+   - propertyType
+   - propertySize
+   - propertyData
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, b'propertyTypeName', None, None, ), # 1
+    (2, TType.I32, b'propertyType', None, None, ), # 2
+    (3, TType.I16, b'propertySize', None, None, ), # 3
+    (4, TType.STRING, b'propertyData', None, None, ), # 4
+  )
+
+  def __init__(self, propertyTypeName=None, propertyType=None, propertySize=None, propertyData=None,):
+    self.propertyTypeName = propertyTypeName
+    self.propertyType = propertyType
+    self.propertySize = propertySize
+    self.propertyData = propertyData
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.propertyTypeName = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.propertyType = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I16:
+          self.propertySize = iprot.readI16();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRING:
+          self.propertyData = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin(b'Property')
+    if self.propertyTypeName is not None:
+      oprot.writeFieldBegin(b'propertyTypeName', TType.STRING, 1)
+      oprot.writeString(self.propertyTypeName)
+      oprot.writeFieldEnd()
+    if self.propertyType is not None:
+      oprot.writeFieldBegin(b'propertyType', TType.I32, 2)
+      oprot.writeI32(self.propertyType)
+      oprot.writeFieldEnd()
+    if self.propertySize is not None:
+      oprot.writeFieldBegin(b'propertySize', TType.I16, 3)
+      oprot.writeI16(self.propertySize)
+      oprot.writeFieldEnd()
+    if self.propertyData is not None:
+      oprot.writeFieldBegin(b'propertyData', TType.STRING, 4)
+      oprot.writeString(self.propertyData)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

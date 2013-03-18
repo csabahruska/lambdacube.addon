@@ -235,7 +235,7 @@ class TNonblockingServer:
     def prepare(self):
         """Prepares server for serve requests."""
         self.socket.listen()
-        for _ in xrange(self.threads):
+        for _ in range(self.threads):
             thread = Worker(self.tasks)
             thread.setDaemon(True)
             thread.start()
@@ -298,7 +298,7 @@ class TNonblockingServer:
 
     def close(self):
         """Closes the server."""
-        for _ in xrange(self.threads):
+        for _ in range(self.threads):
             self.tasks.put([None, None, None, None, None])
         self.socket.close()
         self.prepared = False

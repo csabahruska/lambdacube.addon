@@ -21,11 +21,6 @@ if "bpy" in locals():
 else:
     from lambdacube import lcserver
 
-import bpy
-import sys
-from bpy.props import FloatVectorProperty
-from mathutils import Vector
-
 #### REGISTER ####
 
 def register():
